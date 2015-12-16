@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		871161AC1C1F4AC400A405E7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 871161AB1C1F4AC400A405E7 /* main.cpp */; };
+		871161B41C1F4ACE00A405E7 /* pzb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 871161B21C1F4ACE00A405E7 /* pzb.cpp */; };
+		871161B61C1F4AF600A405E7 /* libpartialzip-1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 871161B51C1F4AF600A405E7 /* libpartialzip-1.0.0.dylib */; };
+		871161B81C1F4AFC00A405E7 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 871161B71C1F4AFC00A405E7 /* libz.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +28,10 @@
 /* Begin PBXFileReference section */
 		871161A81C1F4AC400A405E7 /* pzb */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = pzb; sourceTree = BUILT_PRODUCTS_DIR; };
 		871161AB1C1F4AC400A405E7 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		871161B21C1F4ACE00A405E7 /* pzb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pzb.cpp; sourceTree = "<group>"; };
+		871161B31C1F4ACE00A405E7 /* pzb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pzb.hpp; sourceTree = "<group>"; };
+		871161B51C1F4AF600A405E7 /* libpartialzip-1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libpartialzip-1.0.0.dylib"; path = "../../../../usr/local/lib/libpartialzip-1.0.0.dylib"; sourceTree = "<group>"; };
+		871161B71C1F4AFC00A405E7 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +39,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				871161B81C1F4AFC00A405E7 /* libz.tbd in Frameworks */,
+				871161B61C1F4AF600A405E7 /* libpartialzip-1.0.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,6 +50,8 @@
 		8711619F1C1F4AC400A405E7 = {
 			isa = PBXGroup;
 			children = (
+				871161B71C1F4AFC00A405E7 /* libz.tbd */,
+				871161B51C1F4AF600A405E7 /* libpartialzip-1.0.0.dylib */,
 				871161AA1C1F4AC400A405E7 /* pzb */,
 				871161A91C1F4AC400A405E7 /* Products */,
 			);
@@ -57,6 +68,8 @@
 		871161AA1C1F4AC400A405E7 /* pzb */ = {
 			isa = PBXGroup;
 			children = (
+				871161B31C1F4ACE00A405E7 /* pzb.hpp */,
+				871161B21C1F4ACE00A405E7 /* pzb.cpp */,
 				871161AB1C1F4AC400A405E7 /* main.cpp */,
 			);
 			path = pzb;
@@ -118,6 +131,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				871161B41C1F4ACE00A405E7 /* pzb.cpp in Sources */,
 				871161AC1C1F4AC400A405E7 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -207,6 +221,9 @@
 		871161B01C1F4AC400A405E7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -214,6 +231,9 @@
 		871161B11C1F4AC400A405E7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
