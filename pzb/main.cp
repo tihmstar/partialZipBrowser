@@ -128,52 +128,16 @@ void makeDirs(string dirs){
         poss += pos+1;
     }
 }
-
-int cmd_get(pzb &obj, string file, string dst, bool mkdirs){
-    
-    if (!existFile(obj.getFiles(), file)){
-        cout << "Error: file " << file << " does not exist, or is a directory"<<endl;
-        return -2;
-    }
-    cout << "getting: "<<file<<endl;
-    
-    
-    if (mkdirs) makeDirs(dst);
-    else {
-        size_t pos = 0;
-        if ((pos = dst.find_last_of("/")) != std::string::npos) {
-            dst = dst.substr(pos+1);
-        }
-    }
-    
-    bool dwn = obj.downloadFile(file,dst);
-    if (!dwn){
-        cout << "download failed"<<endl;
-        return -3;
-    }else{
-        cout << "download succeeded"<<endl;
-        return 0;
-    }
-}
-
-int cmd_get_dir(pzb &obj, string dir, string dstdir, bool mkdirs){
-    
-    vector<pzb::t_fileinfo*> files = find_quiet(obj.getFiles(), dir);
-    int ret = 0;
-    for (pzb::t_fileinfo *f : files){
-        if (f->name.substr(f->name.length()-1) == "/") continue;
-        string fdst = f->name;
-        size_t pos = 0;
-        if ((pos = fdst.find_last_of("/")) != std::string::npos) {
-            fdst = fdst.substr(pos+1);
-        }
-        fdst = dstdir + fdst;
-    
-        if (cmd_get(obj, f->name, fdst, mkdirs) != 0) ret++; //count failed downloads
-    }
-    
-    return ret;
-}
+/*
+printf("Usage: %s [OPTIONS] FILE\n", (name ? name + 1 : argv[0]));
+printf("Restore IPSW firmware FILE to an iOS device.\n\n");
+printf("  -i, --ecid ECID\ttarget specific device by its hexadecimal ECID\n");
+printf("                 \te.g. 0xaabb123456 or 00000012AABBCCDD\n");
+printf("  -u, --udid UDID\ttarget specific device by its 40-digit device UDID\n");
+printf("                 \tNOTE: only works with devices in normal mode.\n");
+printf("  -d, --debug\t\tenable communication debugging\n");
+printf("  -h, --help\t\tprints usage information\n");
+*/
 
 void cmd_help(const char *progname){
     cout << "Usage: "<<progname<< " [parameter] <url to zip>\n";
@@ -186,30 +150,25 @@ void cmd_help(const char *progname){
     cout << "  -l                         \tshows contents and subdirectories of zip\n";
     cout << "      --list=[path]          \tshows contents and subdirectories of [path] in zip\n";
     cout << "      --nosubdirs            \tdon't show subdirectories. Does nothing without -l or --list\n";
-    cout << "  -c, --create-directories   \tdownload files with it' directories and subdirectories\n";
     cout << "  -h, --help                 \tshows this help\n";
-    cout << "  -g, --get       <path>     \tdownloads remote file\n";
-    cout << "  -d, --directory            \tdownload remote directory recursively instead of sindle file\n";
-    cout << "                             \tuse this with -g (--get)\n";
-    cout << "  -o, --output    <path>     \tspecify dst filename when downloading\n";
+    cout << "  -d, --download  <path>     \tdownloads remote file or directory recursively\n";
+    cout << "  -o, --output    <path>     \tspecify dst filename or directory when downloading\n";
     cout << "\n";
 }
 
 static struct option longopts[] = {
-    { "list",               optional_argument,  NULL, 'l' },
-    { "nosubdirs",          no_argument,        NULL, 'l' },
-    { "help",               no_argument,        NULL, 'h' },
-    { "directory",          no_argument,        NULL, 'd' },
-    { "get",                required_argument,  NULL, 'g' },
-    { "output",             required_argument,  NULL, 'o' },
-    { "create-directories", no_argument,        NULL, 'c' },
+    { "list",       optional_argument,  NULL, 'l' },
+    { "nosubdirs",  no_argument,        NULL, 'l' },
+    { "help",       no_argument,        NULL, 'h' },
+    { "download",   required_argument,  NULL, 'd' },
+    { "output",     required_argument,  NULL, 'o' },
     { NULL, 0, NULL, 0 }
 };
 
 #define FLAG_LIST       1 << 0
 #define FLAG_NOSUBDIRS  1 << 1
 #define FLAG_DOWNLOAD   1 << 2
-#define FLAG_DIRECTORY  1 << 3
+#define FLAG_OUTPUT     1 << 3
 
 int main(int argc, const char * argv[]) {
     const char *progname = argv[0];
@@ -220,7 +179,6 @@ int main(int argc, const char * argv[]) {
     
     pzb *myobj;
     const char *url; //= "http://appldnld.apple.com/ios9.1/031-41110-20151021-BA1A8482-73FB-11E5-BDCC-A37243DA716B/iPhone7,2_9.1_13B143_Restore.ipsw";
-    bool mkdirs = false;
     
     int opt = 0;
     int optindex = 0;
@@ -251,7 +209,7 @@ int main(int argc, const char * argv[]) {
                 if (optarg) listdir = optarg;
                 break;
                 
-            case 'g':
+            case 'd':
                 paramFlags |= FLAG_DOWNLOAD;
                 if (strncmp((downloadPath = optarg), "-", 1) == 0){
                     cout << "Error: --download requires a parameter!\n";
@@ -259,16 +217,11 @@ int main(int argc, const char * argv[]) {
                 };
                 break;
             case 'o':
+                paramFlags |= FLAG_OUTPUT;
                 if (strncmp((outputPath = optarg), "-", 1) == 0){
                     cout << "Error: --output requires a parameter!\n";
                     return -1;
                 };
-                break;
-            case 'c':
-                mkdirs = true;
-                break;
-            case 'd':
-                paramFlags |= FLAG_DIRECTORY;
                 break;
                 
             default:
@@ -295,6 +248,7 @@ int main(int argc, const char * argv[]) {
     }
     
     vector<pzb::t_fileinfo*> files =  myobj->getFiles();
+    bool mkdirs = false;
     int slen =0;
     for (int i=myobj->biggestFileSize(); i>0; i /=10) {
         slen++;
@@ -303,20 +257,11 @@ int main(int argc, const char * argv[]) {
     
     if (paramFlags) {
         if (paramFlags & FLAG_LIST) {
-            string dir = (listdir) ? listdir : "";
-            if (dir.length() && dir.substr(dir.length()-1) != "/") dir += "/";
-            
-            return (paramFlags & FLAG_NOSUBDIRS) ? ls(myobj->getFiles(), slen, dir) : find(myobj->getFiles(), slen, dir);
-            
-        }else if (paramFlags & FLAG_DOWNLOAD){
-            string file = downloadPath;
-            size_t pos = 0;
-            string dst = (outputPath) ? outputPath : file.substr(((pos = file.find_last_of("/")) == string::npos) ? 0 : pos +1);
-            
-#warning TODO implement dst dir when downloading directories
-            return (paramFlags & FLAG_DIRECTORY) ? cmd_get_dir(*myobj, file, "", mkdirs)
-                                                    : cmd_get(*myobj, file, dst, mkdirs);
-            
+            string ldir;
+            if (listdir) {
+                ldir = listdir;
+            }
+            return (paramFlags & FLAG_NOSUBDIRS) ? ls(myobj->getFiles(), slen, ldir) : find(myobj->getFiles(), slen, ldir);
         }
         return 0;
     }
@@ -369,19 +314,29 @@ int main(int argc, const char * argv[]) {
                 cout << "Error: get needs a parameter"<<endl;
                 continue;
             }
-            
-            string dst = file.substr(currentDir.length());
-            
-            cmd_get(*myobj, file, dst, mkdirs);
-            
-        }else if (argv[0] == "getd") {
-            if (argv.size() == 1) {
-                cout << "Error: getd needs a parameter"<<endl;
+            if (!existFile(files, dir.substr(0,file.length()))){
+                cout << "Error: file " << file << " does not exist, or is a directory"<<endl;
                 continue;
             }
-            
-            cmd_get_dir(*myobj, dir, "", mkdirs);
+            cout << "getting: "<<file<<endl;
 
+            string dst = file.substr(currentDir.length());
+            
+            if (mkdirs) makeDirs(dst);
+            else {
+                size_t pos = 0;
+                if ((pos = dst.find_last_of("/")) != std::string::npos) {
+                    dst = dst.substr(pos+1);
+                }
+            }
+            
+            bool dwn = myobj->downloadFile(file,dst);
+            if (!dwn){
+                cout << "download failed"<<endl;
+            }else{
+                cout << "download succeeded"<<endl;
+            }
+            
         }else if (argv[0] == "mkdirs"){
             if (argv.size() >= 1 && argv[1] == "toggle") {
                 mkdirs = (!mkdirs);

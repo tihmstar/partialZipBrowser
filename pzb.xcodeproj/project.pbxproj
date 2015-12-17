@@ -257,6 +257,7 @@
 				871161B11C1F4AC400A405E7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
