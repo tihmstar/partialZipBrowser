@@ -1,0 +1,22 @@
+partialZipBrowser
+
+partialZipBrowser is a commandline tool for browsing and downloading files from zip files on remote webserver.
+
+
+Usage: ./pzb [parameter] <url to zip>
+Browse and download files and directories from remote zip
+Specifying no parameter starts an interactive console
+
+Usage: parameter <required argument> [optional argument]
+Following parameter are avaliable: 
+  -l                         	shows contents and subdirectories of zip
+      --list=[path]          	shows contents and subdirectories of [path] in zip
+      --nosubdirs            	don't show subdirectories. Does nothing without -l or --list
+  -c, --create-directories   	download files with it' directories and subdirectories
+  -h, --help                 	shows this help
+  -g, --get       <path>     	downloads remote file
+  -d, --directory            	download remote directory recursively instead of sindle file
+                             	use this with -g (--get)
+  -o, --output    <path>     	specify dst filename when downloading
+
+
