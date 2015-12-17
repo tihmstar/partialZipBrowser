@@ -219,7 +219,7 @@ int main(int argc, const char * argv[]) {
     progname = argv[0] + spos;
     
     pzb *myobj;
-    const char *url; //= "http://appldnld.apple.com/ios9.1/031-41110-20151021-BA1A8482-73FB-11E5-BDCC-A37243DA716B/iPhone7,2_9.1_13B143_Restore.ipsw";
+    const char *url;
     bool mkdirs = false;
     
     int opt = 0;
