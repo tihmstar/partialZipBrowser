@@ -164,7 +164,7 @@ int cmd_get_dir(pzb &obj, string dir, string dstdir, bool mkdirs){
         if (f->name.substr(f->name.length()-1) == "/") continue;
         string fdst = f->name;
         size_t pos = 0;
-        if ((pos = fdst.find_last_of("/")) != std::string::npos) {
+        if (!mkdirs && (pos = fdst.find_last_of("/")) != std::string::npos) {
             fdst = fdst.substr(pos+1);
         }
         fdst = dstdir + fdst;
@@ -236,7 +236,7 @@ int main(int argc, const char * argv[]) {
     char *downloadPath = 0;
     char *outputPath = 0;
     
-    while ((opt = getopt_long(argc, (char * const *)argv, "lhd:o:", longopts, &optindex)) > 0) {
+    while ((opt = getopt_long(argc, (char * const *)argv, "lhdcg:o:", longopts, &optindex)) > 0) {
         switch (opt) {
             case 'h':
                 cmd_help(progname);
