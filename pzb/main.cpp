@@ -407,7 +407,6 @@ int main(int argc, const char * argv[]) {
         }else{
             cout << argv[0]<< ": command not found"<< endl;
         }
-        //TODO cmds: getd
     } while (true);
     
     
