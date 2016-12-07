@@ -11,6 +11,8 @@
 #include "pzb.hpp"
 #include <sys/stat.h>
 #include <getopt.h>
+#include <termios.h>
+#include <unistd.h>
 
 
 vector<pzb::t_fileinfo*> find_quiet(vector<pzb::t_fileinfo*> files, string currentDir){
@@ -211,6 +213,130 @@ static struct option longopts[] = {
 #define FLAG_DOWNLOAD   1 << 2
 #define FLAG_DIRECTORY  1 << 3
 
+enum t_specialKey{
+    kSpecialKeyUndefined = 0,
+    kSpecialKeyArrowkeyUp = 1,
+    kSpecialKeyArrowkeyDown = 2,
+    kSpecialKeyArrowkeyRight = 3,
+    kSpecialKeyArrowkeyLeft = 4,
+    kSpecialKeyBackspace,
+    kSpecialKeyTab
+};
+
+string getCommand(const string &currentDir, vector<string> &history){
+#define ret history[w]
+    
+    printf("%s $ ",currentDir.c_str());
+    
+//    string ret;
+    
+    //instructing terminal to directly pass us all characters instead of filling a buffer
+    //and not echoing characters back to the user
+    static struct termios oldt, newt;
+    tcgetattr( STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON);
+    newt.c_lflag &= ~(ECHO);
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+    
+    unsigned char c;
+    int i=0;
+    
+    
+    if (history.size() <1 || history[0].length() != 0)
+        history.push_back("");
+
+    size_t k=0; //charcounter
+    size_t w=history.size()-1; //wordcounter
+    
+    size_t jumplast = 0;
+    size_t tabcounter = 0;
+    while ((c = getchar()) != '\n') {
+        t_specialKey ak = kSpecialKeyUndefined;
+        size_t savtab = tabcounter;
+        tabcounter = 0;
+        
+        if (i==0 && c == 27) i++;
+        else if (i == 1 && c == 91) i++;
+        else if (i == 2){
+            if (!(65 <= c && c <= 68)){
+                printf("UNRECOGNISED KEY PRESSED=%d\n",c);
+                i=0;
+                continue;
+            }
+            ak = (t_specialKey)(c-64);
+            goto normalflow;
+        }
+        else{
+        normalflow:
+            if (c == 127) ak = kSpecialKeyBackspace;
+            else if (c == '\t') ak = kSpecialKeyTab;
+            
+            i=0;
+            if (ak != kSpecialKeyUndefined){
+                switch (ak) {
+                    case kSpecialKeyBackspace:
+                        if (k>0){
+                            jumplast = --k;
+                            ret.erase(k,1);
+                            printf("\x1b[2K\r%s $ %s",currentDir.c_str(),ret.c_str());
+                            for (int i=0; i<ret.length()-k; i++) putchar('\b');
+                        }
+                        break;
+                    case kSpecialKeyArrowkeyLeft:
+                        if (k>0){
+                            jumplast = --k;
+                            putchar('\b');
+                        }
+                        break;
+                    case kSpecialKeyArrowkeyRight:
+                        if (k < ret.length()){
+                            putchar(ret.c_str()[k++]);
+                            jumplast = k;
+                        }
+                        break;
+                    case kSpecialKeyArrowkeyUp:
+                        if (w > 0){
+                            w--;
+                            printf("\x1b[2K\r%s $ %s",currentDir.c_str(),ret.c_str());
+                            if (jumplast>k) k = jumplast;
+                            if (k >= ret.length()) k = ret.length();
+                            for (int i=0; i<ret.length()-k; i++) putchar('\b');
+                        }
+                        break;
+                    case kSpecialKeyArrowkeyDown:
+                        if (w<history.size()-1){
+                            w++;
+                            printf("\x1b[2K\r%s $ %s",currentDir.c_str(),ret.c_str());
+                            if (jumplast > k) k = jumplast;
+                            if (k >= ret.length()) k = ret.length();
+                            for (int i=0; i<ret.length()-k; i++) putchar('\b');
+                        }
+                        break;
+                    case kSpecialKeyTab:
+                        tabcounter = savtab+1;
+                        break;
+                        
+                    default:
+                        printf("pressed key=%d\n",ak);
+                        break;
+                }
+                continue;
+            }
+            
+            
+            ret+=c;
+            jumplast = ++k;
+            putchar(c);
+        }
+    }
+    putchar('\n');
+    
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt); //restore old terminal behavior
+    
+    return ret;
+}
+
 int main(int argc, const char * argv[]) {
     const char *progname = argv[0];
     
@@ -325,10 +451,10 @@ int main(int argc, const char * argv[]) {
     
     string uinput;
     string currentDir = "";
-    
+    vector<string> history;
     do{
-        cout <<currentDir << " $ ";
-        getline(std::cin,uinput);
+        uinput = move(getCommand(currentDir, history));
+        if (!uinput.size()) continue;
         
         //parse
         vector<string> argv;

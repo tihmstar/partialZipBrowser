@@ -68,6 +68,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "http://appldnld.apple.com/ios9.1/031-41110-20151021-BA1A8482-73FB-11E5-BDCC-A37243DA716B/iPhone7,2_9.1_13B143_Restore.ipsw"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "file:///Users/tihmstar/iboot_dumpz.zip"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
