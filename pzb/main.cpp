@@ -13,6 +13,7 @@
 #include <getopt.h>
 #include <termios.h>
 #include <unistd.h>
+#include <signal.h>
 
 
 vector<pzb::t_fileinfo*> find_quiet(vector<pzb::t_fileinfo*> files, string currentDir){
@@ -224,9 +225,17 @@ enum t_specialKey{
     kSpecialKeyTab
 };
 
+#warning TODO implement ctrl-c to clear command
+//static int lastcltrc = 0;
+//void ctrlchandler(int s){
+//    printf("Caught signal %d\n",s);
+//
+//    if (lastcltrc >=2) exit(1);
+//    lastcltrc++;
+//}
+
 string getCommand(const string &currentDir, vector<string> &history, function<string(string curcmd, size_t tabcount)> tabfunc){
 #define ret history[w]
-    
     printf("%s $ ",currentDir.c_str());
     
     //instructing terminal to directly pass us all characters instead of filling a buffer
@@ -252,6 +261,7 @@ string getCommand(const string &currentDir, vector<string> &history, function<st
     int isLastchar = 1;
     size_t tabcounter = 0;
     while ((c = getchar()) != '\n') {
+//        lastcltrc = 0; //TODO
         t_specialKey ak = kSpecialKeyUndefined;
         size_t savtab = tabcounter;
         tabcounter = 0;
@@ -466,7 +476,14 @@ int main(int argc, const char * argv[]) {
         return 0;
     }
     
-
+//TODO ctrl-c handler
+//    struct sigaction sigIntHandler;
+//    
+//    sigIntHandler.sa_handler = ctrlchandler;
+//    sigemptyset(&sigIntHandler.sa_mask);
+//    sigIntHandler.sa_flags = 0;
+//    
+//    sigaction(SIGINT, &sigIntHandler, NULL);
     
     string uinput;
     string currentDir = "";
@@ -523,8 +540,10 @@ int main(int argc, const char * argv[]) {
             
             if (tabcount >1){
                 printf("\x1b[2K\r");
-                for (auto m : (mayMatchCMD.size() ? mayMatchCMD : cdfiles)){
-                    cout << m.first << (space ? "\n" : " ");
+                if (!preCmd.size() || !curcmd.size()){
+                    for (auto m : (mayMatchCMD.size() ? mayMatchCMD : cdfiles)){
+                        cout << m.first << (space ? "\n" : " ");
+                    }
                 }
                 cout <<endl;
             }
@@ -564,10 +583,10 @@ int main(int argc, const char * argv[]) {
             
         }else if (argv[0] == "cd") {
             if (argv.size() == 1) {
-                cout << "Error: cd needs a parameter"<<endl;
-                continue;
+                cd(files, currentDir, "/");
+            }else{
+                cd(files, currentDir, argv[1]);
             }
-            cd(files, currentDir, argv[1]);
             
         }else if (argv[0] == "get") {
             if (argv.size() == 1) {
