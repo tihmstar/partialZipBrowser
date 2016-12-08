@@ -220,15 +220,14 @@ enum t_specialKey{
     kSpecialKeyArrowkeyRight = 3,
     kSpecialKeyArrowkeyLeft = 4,
     kSpecialKeyBackspace,
+    kSpecialKeyDelete,
     kSpecialKeyTab
 };
 
-string getCommand(const string &currentDir, vector<string> &history){
+string getCommand(const string &currentDir, vector<string> &history, function<string(string curcmd, size_t tabcount)> tabfunc){
 #define ret history[w]
     
     printf("%s $ ",currentDir.c_str());
-    
-//    string ret;
     
     //instructing terminal to directly pass us all characters instead of filling a buffer
     //and not echoing characters back to the user
@@ -243,13 +242,14 @@ string getCommand(const string &currentDir, vector<string> &history){
     int i=0;
     
     
-    if (history.size() <1 || history[0].length() != 0)
+    if (history.size() <1 || history[history.size()-1].length() != 0)
         history.push_back("");
 
     size_t k=0; //charcounter
     size_t w=history.size()-1; //wordcounter
     
     size_t jumplast = 0;
+    int isLastchar = 1;
     size_t tabcounter = 0;
     while ((c = getchar()) != '\n') {
         t_specialKey ak = kSpecialKeyUndefined;
@@ -259,8 +259,13 @@ string getCommand(const string &currentDir, vector<string> &history){
         if (i==0 && c == 27) i++;
         else if (i == 1 && c == 91) i++;
         else if (i == 2){
-            if (!(65 <= c && c <= 68)){
-                printf("UNRECOGNISED KEY PRESSED=%d\n",c);
+            if (c == 51){
+                getchar(); //read additional special byte
+                ak = kSpecialKeyDelete;
+                goto normalflow;
+            }else if (!(65 <= c && c <= 68)){
+//#warning DEBUG
+//                printf("UNRECOGNISED KEY PRESSED=%d\n",c);
                 i=0;
                 continue;
             }
@@ -279,8 +284,12 @@ string getCommand(const string &currentDir, vector<string> &history){
                         if (k>0){
                             jumplast = --k;
                             ret.erase(k,1);
-                            printf("\x1b[2K\r%s $ %s",currentDir.c_str(),ret.c_str());
-                            for (int i=0; i<ret.length()-k; i++) putchar('\b');
+                        }
+                        break;
+                    case kSpecialKeyDelete:
+                        if (k < ret.length()){
+                            ret.erase(k,1);
+                            goto printStuff;
                         }
                         break;
                     case kSpecialKeyArrowkeyLeft:
@@ -298,36 +307,43 @@ string getCommand(const string &currentDir, vector<string> &history){
                     case kSpecialKeyArrowkeyUp:
                         if (w > 0){
                             w--;
-                            printf("\x1b[2K\r%s $ %s",currentDir.c_str(),ret.c_str());
                             if (jumplast>k) k = jumplast;
-                            if (k >= ret.length()) k = ret.length();
-                            for (int i=0; i<ret.length()-k; i++) putchar('\b');
+                            if (isLastchar == 1 || k >= ret.length()) k = ret.length(),isLastchar=2;
                         }
                         break;
                     case kSpecialKeyArrowkeyDown:
                         if (w<history.size()-1){
                             w++;
-                            printf("\x1b[2K\r%s $ %s",currentDir.c_str(),ret.c_str());
                             if (jumplast > k) k = jumplast;
-                            if (k >= ret.length()) k = ret.length();
-                            for (int i=0; i<ret.length()-k; i++) putchar('\b');
+                            if (isLastchar == 1 || k >= ret.length()) k = ret.length(),isLastchar=2;
                         }
                         break;
                     case kSpecialKeyTab:
-                        tabcounter = savtab+1;
+                        {
+                            tabcounter = savtab+1;
+                            string tmp = tabfunc(ret.substr(0,k),tabcounter);
+                            if (tmp.size() && tmp != ret){
+                                ret = tmp + ret.substr(k);
+                                k=tmp.length();
+                                tabcounter = 0;
+                            }
+                        }
                         break;
                         
                     default:
-                        printf("pressed key=%d\n",ak);
+//#warning DEBUG
+//                        printf("pressed key=%d\n",ak);
                         break;
                 }
-                continue;
+                goto printStuff;
             }
             
-            
-            ret+=c;
+            ret.insert(k, 1, (char)c);
             jumplast = ++k;
-            putchar(c);
+            isLastchar = (k == ret.length());
+        printStuff:
+            printf("\x1b[2K\r%s $ %s",currentDir.c_str(),ret.c_str());
+            for (int i=0; i<ret.length()-k; i++) putchar('\b');
         }
     }
     putchar('\n');
@@ -336,6 +352,9 @@ string getCommand(const string &currentDir, vector<string> &history){
     
     return ret;
 }
+
+
+static vector<string>shellcmds{"ls","cd","find","help","get","getd","mkdirs","exit"};
 
 int main(int argc, const char * argv[]) {
     const char *progname = argv[0];
@@ -453,7 +472,67 @@ int main(int argc, const char * argv[]) {
     string currentDir = "";
     vector<string> history;
     do{
-        uinput = move(getCommand(currentDir, history));
+        uinput = move(getCommand(currentDir, history,[&files,&currentDir](string curcmd, size_t tabcount)->string{
+            
+            char *space = NULL;
+            string preCmd;
+            
+            vector<pair<string, bool>> cdfiles;
+            vector<pair<string, bool>> mayMatchCMD;
+            if ((space = strstr(curcmd.c_str(), " "))){
+                preCmd = curcmd.substr(0,space+1-curcmd.c_str());
+                curcmd = curcmd.substr(preCmd.length());
+                for (auto f : find_quiet(files, currentDir)){
+                    bool d = isDir(f->name);
+                    string c = f->name.substr(currentDir.length());
+                    
+                    if (count(curcmd.begin(),curcmd.end(),'/') < count(c.begin(),c.end(),'/') && c[c.length()-1] != '/') continue;
+                    
+                    if (c.length() <= curcmd.length()) continue;
+                    
+                    if (strncmp(c.c_str(), curcmd.c_str(), min(c.length(),curcmd.length())) == 0 && curcmd.length() <= c.length()){
+                        mayMatchCMD.push_back({c,d});
+                    }else if (!mayMatchCMD.size()){
+                        cdfiles.push_back({c,d});
+                    }
+                }
+            }else{
+                for (auto c : shellcmds){
+                    if (strncmp(c.c_str(), curcmd.c_str(), min(c.length(),curcmd.length())) == 0 && curcmd.length() <= c.length()){
+                        mayMatchCMD.push_back({c,0});
+                    }
+                }
+            }
+            
+            if (!mayMatchCMD.size() && !cdfiles.size()) return "";
+            else if (mayMatchCMD.size() == 1) return preCmd + mayMatchCMD[0].first+ (mayMatchCMD[0].second ? "" : " ");
+            
+            string bestMatch;
+            if (mayMatchCMD.size()) {
+                while (true) {
+                    size_t pos = bestMatch.size();
+                    char c = mayMatchCMD[0].first[pos];
+                    for (auto s : mayMatchCMD){
+                        if (pos >= s.first.size() || s.first[pos] != c)
+                            goto foundBestMatch;
+                    }
+                    bestMatch.push_back(c);
+                }
+            }
+        foundBestMatch:
+            
+            if (tabcount >1){
+                printf("\x1b[2K\r");
+                for (auto m : (mayMatchCMD.size() ? mayMatchCMD : cdfiles)){
+                    cout << m.first << (space ? "\n" : " ");
+                }
+                cout <<endl;
+            }
+            
+            
+            
+            return (bestMatch.size() ? preCmd + bestMatch : "");
+        }));
         if (!uinput.size()) continue;
         
         //parse
