@@ -540,9 +540,19 @@ int main(int argc, const char * argv[]) {
             
             if (tabcount >1){
                 printf("\x1b[2K\r");
-                if (!preCmd.size() || !curcmd.size()){
+                if (!preCmd.size() || !curcmd.size() || curcmd == bestMatch){
                     for (auto m : (mayMatchCMD.size() ? mayMatchCMD : cdfiles)){
-                        cout << m.first << (space ? "\n" : " ");
+                        string s = m.first.substr(curcmd.length());
+                        
+                        const char * t= strstr(m.first.c_str(),"/");
+                        while (const char *tt = strstr(t, "/")) {
+                            if (tt-m.first.c_str() >= curcmd.length()) {
+                                break;
+                            }
+                            t = tt+1;
+                        }
+                        
+                        cout << ((t && *t) ? t : s) << (space ? "\n" : " ");
                     }
                 }
                 cout <<endl;
