@@ -542,17 +542,22 @@ int main(int argc, const char * argv[]) {
                 printf("\x1b[2K\r");
                 if (!preCmd.size() || !curcmd.size() || curcmd == bestMatch){
                     for (auto m : (mayMatchCMD.size() ? mayMatchCMD : cdfiles)){
-                        string s = m.first.substr(curcmd.length());
-                        
-                        const char * t= strstr(m.first.c_str(),"/");
-                        while (const char *tt = strstr(t, "/")) {
-                            if (tt-m.first.c_str() >= curcmd.length()) {
-                                break;
+                        string s;
+                        if (!mayMatchCMD.size()) {
+                            s = m.first.substr(curcmd.length());
+                            
+                            if (const char * t= strstr(m.first.c_str(),"/")){
+                                while (const char *tt = strstr(t, "/")) {
+                                    if (tt-m.first.c_str() >= curcmd.length()) {
+                                        break;
+                                    }
+                                    s = t = tt+1;
+                                }
                             }
-                            t = tt+1;
+                        }else{
+                            s = m.first;
                         }
-                        
-                        cout << ((t && *t) ? t : s) << (space ? "\n" : " ");
+                        cout << s << (space ? "\n" : " ");
                     }
                 }
                 cout <<endl;
