@@ -505,7 +505,7 @@ int main(int argc, const char * argv[]) {
                     
                     if (count(curcmd.begin(),curcmd.end(),'/') < count(c.begin(),c.end(),'/') && c[c.length()-1] != '/') continue;
                     
-                    if (c.length() <= curcmd.length()) continue;
+                    if (c.length() <= curcmd.length() && c[c.length()-1] == '/') continue;
                     
                     if (strncmp(c.c_str(), curcmd.c_str(), min(c.length(),curcmd.length())) == 0 && curcmd.length() <= c.length()){
                         mayMatchCMD.push_back({c,d});
@@ -543,7 +543,7 @@ int main(int argc, const char * argv[]) {
                 if (!preCmd.size() || !curcmd.size() || curcmd == bestMatch){
                     for (auto m : (mayMatchCMD.size() ? mayMatchCMD : cdfiles)){
                         string s;
-                        if (!mayMatchCMD.size()) {
+                        if (preCmd.size()) {
                             s = m.first.substr(curcmd.length());
                             
                             if (const char * t= strstr(m.first.c_str(),"/")){
