@@ -235,7 +235,7 @@ enum t_specialKey{
 //    lastcltrc++;
 //}
 
-string getCommand(const string &currentDir, vector<string> &history, function<string(string curcmd, size_t tabcount)> tabfunc){
+string getCommand(const string &currentDir, vector<string> &history, std::function<string(string curcmd, size_t tabcount)> tabfunc){
 #define ret history[w]
     printf("%s $ ",currentDir.c_str());
     
