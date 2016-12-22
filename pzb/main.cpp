@@ -14,7 +14,8 @@
 #include <termios.h>
 #include <unistd.h>
 #include <signal.h>
-
+#include <algorithm>
+#include <functional>
 
 vector<pzb::t_fileinfo*> find_quiet(vector<pzb::t_fileinfo*> files, string currentDir){
     vector<pzb::t_fileinfo*> ret;
@@ -496,7 +497,7 @@ int main(int argc, const char * argv[]) {
             
             vector<pair<string, bool>> cdfiles;
             vector<pair<string, bool>> mayMatchCMD;
-            if ((space = strstr(curcmd.c_str(), " "))){
+            if ((space = ::strstr(curcmd.c_str(), " "))){
                 preCmd = curcmd.substr(0,space+1-curcmd.c_str());
                 curcmd = curcmd.substr(preCmd.length());
                 for (auto f : find_quiet(files, currentDir)){
