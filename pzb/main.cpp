@@ -492,12 +492,12 @@ int main(int argc, const char * argv[]) {
     do{
         uinput = move(getCommand(currentDir, history,[&files,&currentDir](string curcmd, size_t tabcount)->string{
             
-            char *space = NULL;
+            const char *space = NULL;
             string preCmd;
             
             vector<pair<string, bool>> cdfiles;
             vector<pair<string, bool>> mayMatchCMD;
-            if ((space = ::strstr(curcmd.c_str(), " "))){
+            if ((space = strstr(curcmd.c_str(), " "))){
                 preCmd = curcmd.substr(0,space+1-curcmd.c_str());
                 curcmd = curcmd.substr(preCmd.length());
                 for (auto f : find_quiet(files, currentDir)){
