@@ -7,7 +7,7 @@ AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
-CXXFLAGS+=" -std=c++11"
+CXXFLAGS+=" -std=c++11 -stdlib=libc++"
 AC_PROG_INSTALL
 
 # Checks for libraries.
