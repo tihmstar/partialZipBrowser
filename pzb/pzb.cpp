@@ -10,8 +10,8 @@
 #include <vector>
 #include <iomanip>
 #include <exception>
-#include <libpartialzip-1.0/libpartialzip.h>
 #include <string.h>
+#include <libpartialzip-1.0/libpartialzip.h>
 #include <pzb.hpp>
 
 using namespace std;
