@@ -13,8 +13,8 @@
 #include <vector>
 #include <iomanip>
 #include <exception>
-#include <libpartialzip-1.0/libpartialzip.h>
 #include <string.h>
+#include <libfragmentzip/libfragmentzip.h>
 
 using namespace std;
 
@@ -28,7 +28,7 @@ public:
 private:
     void log(string msg);
     std::string *_url;
-    partialzip_t* pzf;
+    fragmentzip_t* pzf;
     vector<t_fileinfo*> *files;
     uint32_t _biggestFileSize;
     

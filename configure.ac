@@ -11,7 +11,7 @@ CXXFLAGS+=" -std=c++11 -stdlib=libc++"
 AC_PROG_INSTALL
 
 # Checks for libraries.
-PKG_CHECK_MODULES(libpartialzip, libpartialzip-1.0 >= 1.0)
+PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 1.0)
 
 # Checks for header files.
 AC_CHECK_HEADERS([string.h termios.h unistd.h])

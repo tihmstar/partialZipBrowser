@@ -1,7 +1,7 @@
-AM_CXXFLAGS = $(libpartialzip_CFLAGS)
-AM_LDFLAGS = $(libpartialzip_LIBS)
+AM_CXXFLAGS = $(libfragmentzip_CFLAGS)
+AM_LDFLAGS = $(libfragmentzip_LIBS)
 
-bin_PROGRAMS	= pzb_tool
-pzb_tool_CXXFLAGS = $(AM_CXXFLAGS)
-pzb_tool_LDADD = $(AM_LDFLAGS)
-pzb_tool_SOURCES = pzb.cpp main.cpp
+bin_PROGRAMS	= pzb
+pzb_CXXFLAGS = $(AM_CXXFLAGS)
+pzb_LDADD = $(AM_LDFLAGS)
+pzb_SOURCES = pzb.cpp main.cpp

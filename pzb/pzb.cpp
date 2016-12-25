@@ -11,7 +11,6 @@
 #include <iomanip>
 #include <exception>
 #include <string.h>
-#include <libpartialzip-1.0/libpartialzip.h>
 #include <pzb.hpp>
 
 using namespace std;
@@ -31,7 +30,7 @@ static void printline(int percent){
     cout << "]";
 }
 
-static void partialzip_callback(partialzip_t* info, partialzip_file_t* file, size_t progress){
+static void fragmentzip_callback(uint progress){
     cout << "\x1b[A\033[J" ; //clear 2 lines
     printline((int)progress);
     cout <<endl;
@@ -44,7 +43,7 @@ void pzb::log(string msg){
 pzb::pzb(std::string url){
     _url = new string(url);
     log("init pzb: "+url);
-    pzf = partialzip_open(url.c_str());
+    pzf = fragmentzip_open(url.c_str());
     
 #warning TODO throw exception on failed init
     if (!pzf) throw -1;
@@ -57,25 +56,23 @@ pzb::pzb(std::string url){
 
 vector<pzb::t_fileinfo*> pzb::getFiles(){
     if (!files) {
-        files = new vector<t_fileinfo*>[pzf->centralDirectoryDesc->CDDiskEntries];
+        files = new vector<t_fileinfo*>[pzf->cd_end->cd_entries];
         
-        char* cur = pzf->centralDirectory;
-        for(int i = 0; i < pzf->centralDirectoryDesc->CDEntries; i++)
+        fragmentzip_cd* candidate = pzf->cd;
+        for(int i = 0; i < pzf->cd_end->cd_entries; i++)
         {
-            partialzip_file_t* candidate = (partialzip_file_t*) cur;
             
             pzb::t_fileinfo *file = new pzb::t_fileinfo();
-            char *name = (char*)malloc(candidate->lenFileName+1);
-            memcpy(name, cur + sizeof(partialzip_file_t), candidate->lenFileName);
-            name[candidate->lenFileName] = '\0';
+            char *name = (char*)malloc(candidate->len_filename+1);
+            memcpy(name, candidate->filename, candidate->len_filename);
+            name[candidate->len_filename] = '\0';
             file->name = name;
             free(name);
             
-            file->compressedSize = candidate->compressedSize;
-            file->size = candidate->size;
+            file->compressedSize = candidate->size_compressed;
+            file->size = candidate->size_uncompressed;
             files->push_back(file);
-            cur += sizeof(partialzip_file_t) + candidate->lenFileName + candidate->lenExtra + candidate->lenComment;
-            
+            candidate = fragmentzip_nextCD(candidate);
         }
     }
     return *files;
@@ -92,19 +89,19 @@ uint32_t pzb::biggestFileSize(){
 }
 
 bool pzb::downloadFile(string filename, string dst){
-    partialzip_file_t *file = partialzip_find_file(pzf, filename.c_str());
+    fragmentzip_cd *file = fragmentzip_getCDForPath(pzf, filename.c_str());
     if (!file) return false;
     
-    putFilename((char*)file + sizeof(partialzip_file_t), file->lenFileName);
+    putFilename(file->filename, file->len_filename);
     cout << ":"<<endl;
-    partialzip_callback(nullptr, file, 0); //print 0% state
-    int dwn = partialzip_download_file(pzf->url, filename.c_str(), dst.c_str(), partialzip_callback);
+    fragmentzip_callback(0); //print 0% state
+    int dwn = fragmentzip_download_file(pzf, filename.c_str(), dst.c_str(), fragmentzip_callback);
     
     if (dwn == 0) {
         //            partialzip_callback(nullptr, file, 100); //print 100% state
         return true;
     }else{
-        partialzip_callback(nullptr, file, 0); //print 0% state
+        fragmentzip_callback(0); //print 0% state
         return false;
     }
 }
@@ -119,6 +116,6 @@ pzb::~pzb(){
         }
         delete [] files;
     }
-    partialzip_close(pzf);
+    fragmentzip_close(pzf);
 }
 
