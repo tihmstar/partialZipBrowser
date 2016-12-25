@@ -63,19 +63,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-c -d -g Firmware/dfu http://appldnld.apple.com/ios9.1/031-41110-20151021-BA1A8482-73FB-11E5-BDCC-A37243DA716B/iPhone7,2_9.1_13B143_Restore.ipsw"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "http://appldnld.apple.com/ios9.1/031-41110-20151021-BA1A8482-73FB-11E5-BDCC-A37243DA716B/iPhone7,2_9.1_13B143_Restore.ipsw"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "file:///Users/tihmstar/iboot_dumpz.zip"
-            isEnabled = "NO">
-         </CommandLineArgument>
-         <CommandLineArgument
-            argument = "http://appldnld.apple.com/ios10.1.1/031-88364-20161109-4C561C38-A503-11E6-A141-43AEF9858D7F/iPhone_4.0_64bit_10.1.1_14B150_Restore.ipsw"
+            argument = " http://appldnld.apple.com/ios10.2seed/031-93643-20161207-6173C962-BBD8-11E6-B93D-977FE47229E1/iPhone_4.0_64bit_10.2_14C92_Restore.ipsw"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
