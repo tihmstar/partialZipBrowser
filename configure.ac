@@ -12,7 +12,7 @@ CXXFLAGS+=" -std=c++11"
 # Check for operating system
 AC_MSG_CHECKING([whether we need platform-specific build settings])
 case ${host_os} in
-  darwin*)
+  *darwin*)
 	CXXFLAGS+=" -stdlib=libc++"
     ;;
 esac
