@@ -7,7 +7,16 @@ AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
 AC_PROG_CXX
-CXXFLAGS+=" -std=c++11 -stdlib=libc++"
+CXXFLAGS+=" -std=c++11"
+
+# Check for operating system
+AC_MSG_CHECKING([whether we need platform-specific build settings])
+case ${host_os} in
+  darwin*)
+	CXXFLAGS+=" -stdlib=libc++"
+    ;;
+esac
+
 AC_PROG_INSTALL
 
 # Checks for libraries.
