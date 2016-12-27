@@ -17,6 +17,9 @@ case ${host_os} in
     ;;
 esac
 
+echo ${host_os}
+echo CXXFLAGS
+
 AC_PROG_INSTALL
 
 # Checks for libraries.
