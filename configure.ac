@@ -9,16 +9,14 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX
 CXXFLAGS+=" -std=c++11"
 
+AC_CANONICAL_HOST
 # Check for operating system
 AC_MSG_CHECKING([whether we need platform-specific build settings])
-case ${host_os} in
-  *darwin*)
+case $host_os in
+  darwin* )
 	CXXFLAGS+=" -stdlib=libc++"
-    ;;
+        ;;
 esac
-
-echo ${host_os}
-echo CXXFLAGS
 
 AC_PROG_INSTALL
 
