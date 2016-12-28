@@ -451,7 +451,7 @@ int main(int argc, const char * argv[]) {
     }
     
     vector<pzb::t_fileinfo*> files =  myobj->getFiles();
-    uint slen =0;
+    unsigned int slen =0;
     for (uint32_t i=myobj->biggestFileSize(); i>0; i /=10) {
         slen++;
     }

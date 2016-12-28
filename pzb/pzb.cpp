@@ -30,7 +30,7 @@ static void printline(int percent){
     cout << "]";
 }
 
-static void fragmentzip_callback(uint progress){
+static void fragmentzip_callback(unsigned int progress){
     cout << "\x1b[A\033[J" ; //clear 2 lines
     printline((int)progress);
     cout <<endl;
