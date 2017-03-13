@@ -10,6 +10,7 @@
 		871161AC1C1F4AC400A405E7 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 871161AB1C1F4AC400A405E7 /* main.cpp */; };
 		871161B41C1F4ACE00A405E7 /* pzb.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 871161B21C1F4ACE00A405E7 /* pzb.cpp */; };
 		8715E21D1E0FDC2400D5E3F8 /* libfragmentzip.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8715E21B1E0FDBB000D5E3F8 /* libfragmentzip.0.dylib */; };
+		876DC4F21E77228C00A0D66B /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 876DC4F11E77228C00A0D66B /* libcurl.tbd */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,6 +31,7 @@
 		871161B21C1F4ACE00A405E7 /* pzb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = pzb.cpp; sourceTree = "<group>"; };
 		871161B31C1F4ACE00A405E7 /* pzb.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = pzb.hpp; sourceTree = "<group>"; };
 		8715E21B1E0FDBB000D5E3F8 /* libfragmentzip.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfragmentzip.0.dylib; path = ../../../../usr/local/lib/libfragmentzip.0.dylib; sourceTree = "<group>"; };
+		876DC4F11E77228C00A0D66B /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,6 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				876DC4F21E77228C00A0D66B /* libcurl.tbd in Frameworks */,
 				8715E21D1E0FDC2400D5E3F8 /* libfragmentzip.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -74,6 +77,7 @@
 		87DBF8011E0FD4DE001ABCCB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				876DC4F11E77228C00A0D66B /* libcurl.tbd */,
 				8715E21B1E0FDBB000D5E3F8 /* libfragmentzip.0.dylib */,
 			);
 			name = Frameworks;

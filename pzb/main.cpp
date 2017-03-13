@@ -196,6 +196,8 @@ void cmd_help(const char *progname){
     cout << "  -d, --directory            \tdownload remote directory recursively instead of sindle file\n";
     cout << "                             \tuse this with -g (--get)\n";
     cout << "  -o, --output    <path>     \tspecify dst filename when downloading\n";
+    cout << "  -k, --insecure             \tdisable ssl validation\n";
+    cout << "  -u, --user[:password]      \tauthenticate to webserver\n";
     cout << "\n";
 }
 
@@ -207,6 +209,8 @@ static struct option longopts[] = {
     { "get",                required_argument,  NULL, 'g' },
     { "output",             required_argument,  NULL, 'o' },
     { "create-directories", no_argument,        NULL, 'c' },
+    { "insecure",           no_argument,        NULL, 'k' },
+    { "user",               required_argument,  NULL, 'u' },
     { NULL, 0, NULL, 0 }
 };
 
@@ -214,6 +218,7 @@ static struct option longopts[] = {
 #define FLAG_NOSUBDIRS  1 << 1
 #define FLAG_DOWNLOAD   1 << 2
 #define FLAG_DIRECTORY  1 << 3
+#define FLAG_IGNORE_SSL 1 << 4
 
 enum t_specialKey{
     kSpecialKeyUndefined = 0,
@@ -391,12 +396,21 @@ int main(int argc, const char * argv[]) {
     char *listdir = 0;
     char *downloadPath = 0;
     char *outputPath = 0;
+    string login;
     
-    while ((opt = getopt_long(argc, (char * const *)argv, "lhdcg:o:", longopts, &optindex)) > 0) {
+    while ((opt = getopt_long(argc, (char * const *)argv, "lhdku:cg:o:", longopts, &optindex)) > 0) {
         switch (opt) {
             case 'h':
                 cmd_help(progname);
                 return 0;
+            
+            case 'k':
+                paramFlags |= FLAG_IGNORE_SSL;
+                break;
+            
+            case 'u':
+                login = optarg;
+                break;
                 
             case 'l':
                 if ((strncmp(argv[optind-1],"--nosubdirs",strlen("--nosubdirs")) == 0)) {
@@ -442,7 +456,7 @@ int main(int argc, const char * argv[]) {
     
     
     try {
-        myobj = new pzb(url);
+        myobj = new pzb(url,paramFlags & FLAG_IGNORE_SSL,login);
         
 #warning TODO make this correct
     } catch (...) {
@@ -457,29 +471,26 @@ int main(int argc, const char * argv[]) {
     }
 
     
-    if (paramFlags) {
-        if (paramFlags & FLAG_LIST) {
-            string dir = (listdir) ? listdir : "";
-            if (dir.length() && dir.substr(dir.length()-1) != "/") dir += "/";
-            
-            return (paramFlags & FLAG_NOSUBDIRS) ? ls(myobj->getFiles(), slen, dir) : find(myobj->getFiles(), slen, dir);
-            
-        }else if (paramFlags & FLAG_DOWNLOAD){
-            string file = downloadPath;
-            size_t pos = 0;
-            string dst = (outputPath) ? outputPath : file.substr(((pos = file.find_last_of("/")) == string::npos) ? 0 : pos +1);
-            
+    if (paramFlags & FLAG_LIST) {
+        string dir = (listdir) ? listdir : "";
+        if (dir.length() && dir.substr(dir.length()-1) != "/") dir += "/";
+        
+        return (paramFlags & FLAG_NOSUBDIRS) ? ls(myobj->getFiles(), slen, dir) : find(myobj->getFiles(), slen, dir);
+        
+    }else if (paramFlags & FLAG_DOWNLOAD){
+        string file = downloadPath;
+        size_t pos = 0;
+        string dst = (outputPath) ? outputPath : file.substr(((pos = file.find_last_of("/")) == string::npos) ? 0 : pos +1);
+        
 #warning TODO implement dst dir when downloading directories
-            return (paramFlags & FLAG_DIRECTORY) ? cmd_get_dir(*myobj, file, "", mkdirs)
-                                                    : cmd_get(*myobj, file, dst, mkdirs);
-            
-        }
-        return 0;
+        return (paramFlags & FLAG_DIRECTORY) ? cmd_get_dir(*myobj, file, "", mkdirs)
+        : cmd_get(*myobj, file, dst, mkdirs);
+        
     }
     
 //TODO ctrl-c handler
 //    struct sigaction sigIntHandler;
-//    
+//
 //    sigIntHandler.sa_handler = ctrlchandler;
 //    sigemptyset(&sigIntHandler.sa_mask);
 //    sigIntHandler.sa_flags = 0;

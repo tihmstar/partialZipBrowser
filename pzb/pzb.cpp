@@ -12,6 +12,7 @@
 #include <exception>
 #include <string.h>
 #include <pzb.hpp>
+#include <curl/curl.h>
 
 using namespace std;
 
@@ -40,14 +41,51 @@ void pzb::log(string msg){
     cout << msg << endl;
 }
 
-pzb::pzb(std::string url){
+pzb::pzb(const std::string& url){
+    pzb(url, false);
+}
+
+pzb::pzb(const std::string& url, bool disable_ssl_validation){
+    pzb(url, disable_ssl_validation, {});
+}
+
+pzb::pzb(const std::string& url, bool disable_ssl_validation, const std::string& login){
     _url = new string(url);
     log("init pzb: "+url);
     pzf = fragmentzip_open(url.c_str());
     
+    if (!pzf){
+        CURLcode res;
+//        log("[DBG] init failed, trying to recover");
+        CURL *ct = curl_easy_init();
+        curl_easy_setopt(ct, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(ct, CURLOPT_NOBODY,1);
+        
+        res = curl_easy_perform(ct);
+        if (res == CURLE_SSL_CACERT) {
+            if (!disable_ssl_validation)
+                throw (log("SSL certificate problem, try -k"), -2);
+            curl_easy_setopt(ct, CURLOPT_SSL_VERIFYPEER,0);
+            res = curl_easy_perform(ct);
+        }
+        long http_code = 0;
+        curl_easy_getinfo(ct, CURLINFO_RESPONSE_CODE, &http_code);
+        
+        if (http_code == 401) {
+            //unauthorized
+            if (!login.length())
+                throw (log("Auth failed, try -u username[:password]"),-3);
+            curl_easy_setopt(ct, CURLOPT_USERPWD, login.c_str());
+            curl_easy_setopt(ct, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+            res = curl_easy_perform(ct);
+        }
+        curl_easy_getinfo(ct, CURLINFO_RESPONSE_CODE, &http_code);
+        if (http_code < 400)
+            pzf = fragmentzip_open_extended(url.c_str(), ct);
+    }
+    
 #warning TODO throw exception on failed init
     if (!pzf) throw -1;
-    
     
     files = nullptr;
     _biggestFileSize = 0;

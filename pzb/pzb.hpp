@@ -33,7 +33,11 @@ private:
     uint32_t _biggestFileSize;
     
 public:
-    pzb(std::string url);
+    pzb(const std::string& url);
+    pzb(const std::string& url, bool disable_ssl_validation);
+    pzb(const std::string& url, bool disable_ssl_validation, const std::string& username);
+
+    
     vector<t_fileinfo*> getFiles();
     uint32_t biggestFileSize();
     bool downloadFile(string filename, string dst);
