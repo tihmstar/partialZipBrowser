@@ -193,7 +193,7 @@ void cmd_help(const char *progname){
     cout << "  -c, --create-directories   \tdownload files with it' directories and subdirectories\n";
     cout << "  -h, --help                 \tshows this help\n";
     cout << "  -g, --get       <path>     \tdownloads remote file\n";
-    cout << "  -d, --directory            \tdownload remote directory recursively instead of sindle file\n";
+    cout << "  -r, --directory            \tdownload remote directory recursively instead of single file\n";
     cout << "                             \tuse this with -g (--get)\n";
     cout << "  -o, --output    <path>     \tspecify dst filename when downloading\n";
     cout << "  -k, --insecure             \tdisable ssl validation\n";
@@ -205,7 +205,7 @@ static struct option longopts[] = {
     { "list",               optional_argument,  NULL, 'l' },
     { "nosubdirs",          no_argument,        NULL, 'l' },
     { "help",               no_argument,        NULL, 'h' },
-    { "directory",          no_argument,        NULL, 'd' },
+    { "directory",          no_argument,        NULL, 'r' },
     { "get",                required_argument,  NULL, 'g' },
     { "output",             required_argument,  NULL, 'o' },
     { "create-directories", no_argument,        NULL, 'c' },
@@ -437,7 +437,7 @@ int main(int argc, const char * argv[]) {
             case 'c':
                 mkdirs = true;
                 break;
-            case 'd':
+            case 'r':
                 paramFlags |= FLAG_DIRECTORY;
                 break;
                 
