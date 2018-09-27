@@ -97,8 +97,12 @@ vector<pzb::t_fileinfo*> pzb::getFiles(){
         files = new vector<t_fileinfo*>[pzf->cd_end->cd_entries];
         
         fragmentzip_cd* candidate = pzf->cd;
-        for(int i = 0; i < pzf->cd_end->cd_entries; i++)
-        {
+        for(int i = 0; i < pzf->cd_end->cd_entries; i++){
+            //sanity check
+            int64_t checkLen = pzf->length - ((char*)candidate-(char*)pzf->cd) - sizeof(fragmentzip_cd);
+            if (checkLen < 0 || checkLen - candidate->len_filename < 0) {
+                throw 1337;
+            }
             
             pzb::t_fileinfo *file = new pzb::t_fileinfo();
             char *name = (char*)malloc(candidate->len_filename+1);
