@@ -16,6 +16,7 @@
 #include <signal.h>
 #include <algorithm>
 #include <functional>
+#include "all_pzb.h"
 
 vector<pzb::t_fileinfo*> find_quiet(vector<pzb::t_fileinfo*> files, string currentDir){
     vector<pzb::t_fileinfo*> ret;
@@ -374,6 +375,9 @@ static vector<string>shellcmds{"ls","cd","find","help","get","getd","mkdirs","ex
 
 int main(int argc, const char * argv[]) {
     const char *progname = argv[0];
+    
+    printf("Version: " PZB_VERSION_COMMIT_SHA" - " PZB_VERSION_COMMIT_COUNT"\n");
+    printf("%s\n",fragmentzip_version());
     
     size_t spos=strlen(progname)-1;
     while (spos && *(progname + (spos--) - 2) != '/');
