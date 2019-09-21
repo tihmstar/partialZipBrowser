@@ -470,7 +470,7 @@ int main(int argc, const char * argv[]) {
     
     vector<pzb::t_fileinfo*> files =  myobj->getFiles();
     unsigned int slen =0;
-    for (uint32_t i=myobj->biggestFileSize(); i>0; i /=10) {
+    for (uint64_t i=myobj->biggestFileSize(); i>0; i /=10) {
         slen++;
     }
 
@@ -505,7 +505,7 @@ int main(int argc, const char * argv[]) {
     string currentDir = "";
     vector<string> history;
     do{
-        uinput = move(getCommand(currentDir, history,[&files,&currentDir](string curcmd, size_t tabcount)->string{
+        uinput = getCommand(currentDir, history,[&files,&currentDir](string curcmd, size_t tabcount)->string{
             
             const char *space = NULL;
             string preCmd;
@@ -582,7 +582,7 @@ int main(int argc, const char * argv[]) {
             
             
             return (bestMatch.size() ? preCmd + bestMatch : "");
-        }));
+        });
         if (!uinput.size()) continue;
         
         //parse

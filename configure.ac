@@ -25,7 +25,7 @@ esac
 AC_PROG_INSTALL
 
 # Checks for libraries.
-PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 41)
+PKG_CHECK_MODULES(libfragmentzip, libfragmentzip >= 47)
 
 # Checks for header files.
 AC_CHECK_HEADERS([string.h termios.h unistd.h])

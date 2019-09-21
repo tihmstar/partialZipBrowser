@@ -94,10 +94,10 @@ pzb::pzb(const std::string& url, bool disable_ssl_validation, const std::string&
 
 vector<pzb::t_fileinfo*> pzb::getFiles(){
     if (!files) {
-        files = new vector<t_fileinfo*>[pzf->cd_end->cd_entries];
+        files = new vector<t_fileinfo*>[pzf->cd_entries];
         
         fragmentzip_cd* candidate = pzf->cd;
-        for(int i = 0; i < pzf->cd_end->cd_entries; i++){
+        for(int i = 0; i < pzf->cd_entries; i++){
             //sanity check
             int64_t checkLen = pzf->length - ((char*)candidate-(char*)pzf->cd) - sizeof(fragmentzip_cd);
             if (checkLen < 0 || checkLen - candidate->len_filename < 0) {
@@ -111,8 +111,9 @@ vector<pzb::t_fileinfo*> pzb::getFiles(){
             file->name = name;
             free(name);
             
-            file->compressedSize = candidate->size_compressed;
-            file->size = candidate->size_uncompressed;
+            if (fragmentzip_getFileInfo(candidate, &file->compressedSize, &file->size, NULL, NULL)){
+                throw 1338;
+            }
             files->push_back(file);
             candidate = fragmentzip_nextCD(candidate);
         }
@@ -120,7 +121,7 @@ vector<pzb::t_fileinfo*> pzb::getFiles(){
     return *files;
 }
 
-uint32_t pzb::biggestFileSize(){
+uint64_t pzb::biggestFileSize(){
     if (!_biggestFileSize) {
         if (!files) getFiles();
         for (t_fileinfo *f : *files){

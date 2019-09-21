@@ -22,15 +22,15 @@ class pzb {
 public:
     struct t_fileinfo{
         string name;
-        uint32_t compressedSize;
-        uint32_t size;
+        uint64_t compressedSize;
+        uint64_t size;
     };
 private:
     void log(string msg);
     std::string *_url;
     fragmentzip_t* pzf;
     vector<t_fileinfo*> *files;
-    uint32_t _biggestFileSize;
+    uint64_t _biggestFileSize;
     
 public:
     pzb(const std::string& url);
@@ -39,7 +39,7 @@ public:
 
     
     vector<t_fileinfo*> getFiles();
-    uint32_t biggestFileSize();
+    uint64_t biggestFileSize();
     bool downloadFile(string filename, string dst);
     ~pzb();
 };
