@@ -11,7 +11,7 @@
 #include <iomanip>
 #include <exception>
 #include <string.h>
-#include <pzb.hpp>
+#include "pzb.hpp"
 #include <curl/curl.h>
 
 using namespace std;
@@ -146,6 +146,35 @@ bool pzb::downloadFile(string filename, string dst){
     }else{
         fragmentzip_callback(0); //print 0% state
         return false;
+    }
+}
+
+std::vector<uint8_t> pzb::downloadFileToMemory(string filename){
+    fragmentzip_cd *file = fragmentzip_getCDForPath(pzf, filename.c_str());
+    if (!file) return {};
+    std::vector<uint8_t> ret;
+    
+    putFilename(file->filename, file->len_filename);
+    cout << ":"<<endl;
+    fragmentzip_callback(0); //print 0% state
+    int dwn = 0;
+    {
+        char *buf = NULL;
+        size_t bufSize = 0;
+        dwn = fragmentzip_download_to_memory(pzf, filename.c_str(), &buf, &bufSize, fragmentzip_callback);
+        if (buf) {
+            ret.resize(bufSize);
+            memcpy(ret.data(), buf, bufSize);
+            free(buf); buf = NULL;
+        }
+    }
+    
+    if (dwn == 0) {
+        //            partialzip_callback(nullptr, file, 100); //print 100% state
+        return ret;
+    }else{
+        fragmentzip_callback(0); //print 0% state
+        return {};
     }
 }
 

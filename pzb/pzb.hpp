@@ -15,6 +15,7 @@
 #include <exception>
 #include <string.h>
 #include <libfragmentzip/libfragmentzip.h>
+#include <stdint.h>
 
 using namespace std;
 
@@ -41,6 +42,7 @@ public:
     vector<t_fileinfo*> getFiles();
     uint64_t biggestFileSize();
     bool downloadFile(string filename, string dst);
+    std::vector<uint8_t> downloadFileToMemory(string filename);
     ~pzb();
 };
 

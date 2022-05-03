@@ -375,10 +375,7 @@ static vector<string>shellcmds{"ls","cd","find","help","get","getd","mkdirs","ex
 
 int main(int argc, const char * argv[]) {
     const char *progname = argv[0];
-    
-    printf("Version: " PZB_VERSION_COMMIT_SHA" - " PZB_VERSION_COMMIT_COUNT"\n");
-    printf("%s\n",fragmentzip_version());
-    
+        
     size_t spos=strlen(progname)-1;
     while (spos && *(progname + (spos--) - 2) != '/');
     progname = argv[0] + spos;
@@ -434,8 +431,10 @@ int main(int argc, const char * argv[]) {
                 break;
             case 'o':
                 if (strncmp((outputPath = optarg), "-", 1) == 0){
-                    cout << "Error: --output requires a parameter!\n";
-                    return -1;
+                    outputPath = (char*)-1; //this is stdout
+                    dup2(1, 3);
+                    close(1);
+                    dup2(2,1);
                 };
                 break;
             case 'c':
@@ -450,6 +449,9 @@ int main(int argc, const char * argv[]) {
         }
         if (optopt) return -1;
     }
+    
+    printf("Version: " PZB_VERSION_COMMIT_SHA" - " PZB_VERSION_COMMIT_COUNT"\n");
+    printf("%s\n",fragmentzip_version());
     
     if ((argc-optind) == 1){
         url = argv[optind];
@@ -484,12 +486,21 @@ int main(int argc, const char * argv[]) {
     }else if (paramFlags & FLAG_DOWNLOAD){
         string file = downloadPath;
         size_t pos = 0;
-        string dst = (outputPath) ? outputPath : file.substr(((pos = file.find_last_of("/")) == string::npos) ? 0 : pos +1);
-        
-#warning TODO implement dst dir when downloading directories
-        return (paramFlags & FLAG_DIRECTORY) ? cmd_get_dir(*myobj, file, "", mkdirs)
-        : cmd_get(*myobj, file, dst, mkdirs);
-        
+        if (outputPath == (char*)-1) {
+            //write file to stdout
+            if (paramFlags & FLAG_DIRECTORY) {
+                cout << "Writing to stdout not supported when downloading directories\n";
+                return -1;
+            }
+            auto f = myobj->downloadFileToMemory(file);
+            return write(3, f.data(), f.size()) == f.size();
+        }else{
+            string dst = (outputPath) ? outputPath : file.substr(((pos = file.find_last_of("/")) == string::npos) ? 0 : pos +1);
+            
+    #warning TODO implement dst dir when downloading directories
+            return (paramFlags & FLAG_DIRECTORY) ? cmd_get_dir(*myobj, file, "", mkdirs)
+            : cmd_get(*myobj, file, dst, mkdirs);
+        }
     }
     
 //TODO ctrl-c handler
