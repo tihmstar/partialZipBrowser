@@ -144,12 +144,12 @@ int cmd_get(pzb &obj, string file, string dst, bool mkdirs){
     
     
     if (mkdirs) makeDirs(dst);
-    else {
-        size_t pos = 0;
-        if ((pos = dst.find_last_of("/")) != std::string::npos) {
-            dst = dst.substr(pos+1);
-        }
-    }
+//    else {
+//        size_t pos = 0;
+//        if ((pos = dst.find_last_of("/")) != std::string::npos) {
+//            dst = dst.substr(pos+1);
+//        }
+//    }
     
     bool dwn = obj.downloadFile(file,dst);
     if (!dwn){
