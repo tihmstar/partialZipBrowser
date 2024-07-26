@@ -447,7 +447,7 @@ int main(int argc, const char * argv[]) {
             default:
                 break;
         }
-        if (optopt) return -1;
+        
     }
     
     printf("Version: " PZB_VERSION_COMMIT_SHA" - " PZB_VERSION_COMMIT_COUNT"\n");
