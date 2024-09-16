@@ -9,9 +9,8 @@ AC_CONFIG_HEADERS([config.h])
 # Checks for programs.
 AC_PROG_CXX
 CXXFLAGS+=" -std=c++11"
-CXXFLAGS+=" -D PZB_VERSION_COMMIT_COUNT=\\\"$(git rev-list --count HEAD | tr -d '\n')\\\""
-CXXFLAGS+=" -D PZB_VERSION_COMMIT_SHA=\\\"$(git rev-parse HEAD | tr -d '\n')\\\""
-
+AC_DEFINE([PZB_VERSION_COMMIT_COUNT], "m4_esyscmd([git rev-list --count HEAD | tr -d '\n'])", [Git commit count])
+AC_DEFINE([PZB_VERSION_COMMIT_SHA], "m4_esyscmd([git rev-parse HEAD | tr -d '\n'])", [Git commit sha])
 
 AC_CANONICAL_HOST
 # Check for operating system

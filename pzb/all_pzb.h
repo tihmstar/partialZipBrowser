@@ -16,4 +16,11 @@
 #include <config.h>
 #endif
 
+#ifndef PZB_VERSION_COMMIT_COUNT
+#define PZB_VERSION_COMMIT_COUNT "unknown"
+#endif
+#ifndef PZB_VERSION_COMMIT_SHA
+#define PZB_VERSION_COMMIT_SHA "unknown"
+#endif
+
 #endif /* all_pzb_h */
